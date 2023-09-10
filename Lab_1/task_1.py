@@ -109,7 +109,7 @@ def moveXV(X, V):
 #It pauses.
 #It moves in a curve.
 #It pauses again.
-#Finally, it moves in a curve in the opposite direction
+#Finally it moves in a curve in the opposite direction
 
 def main():
     """Main function to execute robot's motion sequence."""
