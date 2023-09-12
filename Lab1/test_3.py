@@ -122,5 +122,29 @@ controller = robot_controller.control(pi=pigpi)
 
 move(controller=controller,Vl=5,Vr=5, D= 1000,T= 0.2)
 
+def turn(controller, angle):
+    """
+    Turns the robot by a certain angle.
+    """
+    
+    # Approximation: Assuming a full 360-degree turn requires 10000 units of distance. 
+    # You'll need to adjust this based on your robot's specifics.
+    units_per_degree = 10000 / 360  
+    
+    # Calculate the units required to achieve the desired turn.
+    D_turn = abs(angle) * units_per_degree
+    
+    # Assuming Vl=5 and Vr=-5 for a right turn, and vice versa for a left turn
+    Vl = 5 if angle > 0 else -5
+    Vr = -5 if angle > 0 else 5
+
+   
+    move(controller, Vl, Vr, D_turn, 0.2)
+
+
+# controller.set_speed_r(0)
+# controller.set_speed_l(0)
+
+
 # controller.set_speed_r(0)
 # controller.set_speed_l(0)
