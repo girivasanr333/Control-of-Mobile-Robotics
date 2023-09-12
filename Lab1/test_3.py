@@ -86,7 +86,7 @@ def move(controller, Vl, Vr, D, T):
 
                 reached_sp_counter += 1
 
-#                 if reached_sp_counter >= wait_after_reach_sp:
+             #if reached_sp_counter >= wait_after_reach_sp:
 
                 if target_angle_r <= total_angle_r:
                     controller.set_speed_r(0.0)
