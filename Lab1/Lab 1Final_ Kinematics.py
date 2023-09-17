@@ -166,7 +166,7 @@ def move(controller, l_speed, r_speed, D, T, both=True):
 #function to turn
 def turn(direction, d):
     if(direction == "left"):
-        move(controller=controller, l_speed=0, r_speed=0.3, D=d, T=0.005, both=False)
+        move(controller=controller, l_speed=-0.3, r_speed=0.3, D=d, T=0.005, both=False)
 
     elif(direction == "right"):
         #move(controller=controller, l_speed=0.3, r_speed=0, D=d, T=0.005, both=False)
@@ -188,8 +188,11 @@ forward(1000)
 print("Right")
 time.sleep(0.2)
 turn("right", 112)
+time.sleep(0.2)
+forward(1000)
+time.sleep(0.2)
+turn("left",112) 
 
 print(controller.imu.gyro)
-
 
 
