@@ -1,78 +1,82 @@
-import statistics
 import time
-import numbers
-import math
-import pigpio
 import robot_controller
-# Robot sensors and motors
-import board
-import adafruit_tca9548a
-import adafruit_vl53l4cd
-import adafruit_bno055
+import pigpio
 
+# Initialize the pigpio library
 pigpi = pigpio.pi()
-left = "left"
-right = "right"
-straight = "straight"
 
 # Initialize the robot controller
 controller = robot_controller.control(pi=pigpi)
 
-def  autonomous_move(controller, T, d):
-    """Move the robot autonomously based on distance sensor readings."""
-    controller.sampling_time = T
-    controller.set_speed_l(0.4)
-    controller.set_speed_r(0.4)
+max_speed = 0.4
+min_speed = 0.35
 
-    thresholdReached = False
-    while not thresholdReached:
-        start_time_each_loop = time.time()
+def get_saturated_speed(speed):
+    if speed > max_speed:
+        return max_speed
+    elif speed < min_speed:
+        return min_speed
+    else:
+        return speed
 
-        # Read the distance sensors
-        # front_distance = controller.front_ds.get_distance()
-        # right_distance = controller.right_ds.get_distance()
-        # left_distance = controller.left_ds.get_distance()
-        # rear_distance = controller.rear_ds.get_distance()
+def turn_90_degrees(direction="right"):
+    """Turns the robot 90 degrees to the specified direction."""
+    if direction == "right":
+        controller.set_speed_l(0.3)
+        controller.set_speed_r(-0.3)
+    else:
+        controller.set_speed_l(-0.3)
+        controller.set_speed_r(0.3)
+    time.sleep(0.1)  # Adjust as necessary for 90-degree turn
+    controller.set_speed_l(0)
+    controller.set_speed_r(0)
 
-        front_distance,  right_distance, rear_distance, left_distance = controller.get_primary_distance_sensor_readings()
+def wall_following(controller, Kp_side=0.1):
+    """Make the robot follow the wall and maintain a distance."""
+    print(f"Starting wall following with Kp_side: {Kp_side}")
 
-        print(front_distance)
+    set_distance = 20  # Set distance from the wall
 
-        
-        # Define a threshold distance below which robot will consider taking action (e.g., 20 cm).
-        threshold = d
-        
-        if front_distance <= threshold:
-            # If an obstacle is detected in the front, the robot should stop or turn.
-            controller.set_speed_l(0)
-            controller.set_speed_r(0)
-            thresholdReached = True
-            #print(front_distance)
-           
-        # elif right_distance < threshold:
-        #     # If an obstacle is detected on the right, turn left.
-        #     controller.set_speed_l(-50)
-        #     controller.set_speed_r(50)
-          
-        # elif left_distance < threshold:
-        #     # If an obstacle is detected on the left, turn right.
-        #     controller.set_speed_l(50)
-        #     controller.set_speed_r(-50)
-        #     time.sleep(1)
-        else:
-            # If no obstacles are detected, move forward.
-            print("Distance not reached")
+    start_time = time.time()
+    current_time = start_time
 
-            controller.set_speed_l(0.4)
-            controller.set_speed_r(0.4)
-        
-        time.sleep(controller.sampling_time - ((time.time() - start_time_each_loop) % controller.sampling_time))
+    while current_time - start_time < 30:
+        # Retrieve distance sensor readings
+        time.sleep(0.1)
+        front_distance, right_distance, _, left_distance = controller.get_primary_distance_sensor_readings()
+        print(f"Front Distance: {front_distance}, Right Distance: {right_distance}, Left Distance: {left_distance}")
 
-autonomous_move(controller=controller, T=0.001, d= 60)
+        # Check front sensor and turn if too close
+        if front_distance < 35:
+            print("Front obstacle detected, turning right!")
+            turn_90_degrees("right")
+            continue
 
-# front_distance,  right_distance, rear_distance, left_distance = controller.get_primary_distance_sensor_readings()
+        error_left = left_distance - set_distance
+        error_right = right_distance - set_distance
+
+        print(f"Left Error: {error_left}, Right Error: {error_right}")
+
+        # Apply proportional control for side walls
+        left_control = Kp_side * error_left
+        right_control = Kp_side * error_right
+        print(f"Left Control Adjustment: {left_control}, Right Control Adjustment: {right_control}")
+
+        l_speed = get_saturated_speed(-1*left_control + right_control)
+        r_speed = get_saturated_speed(left_control - right_control)
+
+        controller.set_speed_l(l_speed)
+        controller.set_speed_r(r_speed)
+
+        current_time = time.time()
+        print(f"time: {current_time - start_time}")
+
+        print(f"Left Motor Speed: {l_speed}, Right Motor Speed: {r_speed}")
+
+    controller.set_speed_l(0)
+    controller.set_speed_r(0)
 
 
-# print(controller.right_ds.distance)
-
-print("2")
+# Test the wall following function
+Kp_side = 0.1  # Replace with the best Kp value from your tests
+wall_following(controller=controller, Kp_side=Kp_side)
