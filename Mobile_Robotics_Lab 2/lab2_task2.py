@@ -78,5 +78,5 @@ def wall_following(controller, Kp_side=0.1):
 
 
 # Test the wall following function
-Kp_side = 0.1  # Replace with the best Kp value from your tests
+Kp_side = 0.1  # Replace with the best Kp value from tests
 wall_following(controller=controller, Kp_side=Kp_side)
