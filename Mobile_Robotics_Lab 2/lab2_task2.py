@@ -8,73 +8,75 @@ pigpi = pigpio.pi()
 # Initialize the robot controller
 controller = robot_controller.control(pi=pigpi)
 
-def move(controller, l_speed, r_speed, D, T):
-    """Move the robot with specified speeds for left and right wheels and a given distance."""
-    print(f"Moving with l_speed: {l_speed}, r_speed: {r_speed}, Distance: {D}, Time: {T}")
-    number_ticks = D / controller.tick_length()
-    controller.sampling_time = T
-    angle_l = controller.get_angle_l()
-    angle_r = controller.get_angle_r()
-    target_angle_r = controller.get_target_angle(number_ticks=number_ticks, angle=angle_r)
-    target_angle_l = controller.get_target_angle(number_ticks=number_ticks, angle=angle_l)
-    position_reached_l = False
-    position_reached_r = False
-    while not position_reached_r or not position_reached_l:
-        angle_l = controller.get_angle_l()
-        angle_r = controller.get_angle_r()
-        controller.set_speed_r(r_speed)
-        controller.set_speed_l(l_speed)
-        if target_angle_r <= angle_r:
-            controller.set_speed_r(0.0)
-            position_reached_r = True
-        if target_angle_l <= angle_l:
-            controller.set_speed_l(0.0)
-            position_reached_l = True
-        time.sleep(T)
-    return None
+max_speed = 0.4
+min_speed = 0.35
 
-def wall_following(controller, direction="left", Kp_side=0.1):
-    """Make the robot follow a wall, either on the left or right side."""
-    print(f"Starting wall following in direction: {direction} with Kp_side: {Kp_side}")
-    if direction not in ["left", "right"]:
-        raise ValueError("Direction should be either 'left' or 'right'")
-    
-    set_distance = 5  # Set distance from the wall
+def get_saturated_speed(speed):
+    if speed > max_speed:
+        return max_speed
+    elif speed < min_speed:
+        return min_speed
+    else:
+        return speed
 
-    while True:
+def turn_90_degrees(direction="right"):
+    """Turns the robot 90 degrees to the specified direction."""
+    if direction == "right":
+        controller.set_speed_l(0.3)
+        controller.set_speed_r(-0.3)
+    else:
+        controller.set_speed_l(-0.3)
+        controller.set_speed_r(0.3)
+    time.sleep(0.1)  # Adjust as necessary for 90-degree turn
+    controller.set_speed_l(0)
+    controller.set_speed_r(0)
+
+def wall_following(controller, Kp_side=0.1):
+    """Make the robot follow the wall and maintain a distance."""
+    print(f"Starting wall following with Kp_side: {Kp_side}")
+
+    set_distance = 20  # Set distance from the wall
+
+    start_time = time.time()
+    current_time = start_time
+
+    while current_time - start_time < 30:
         # Retrieve distance sensor readings
+        time.sleep(0.1)
         front_distance, right_distance, _, left_distance = controller.get_primary_distance_sensor_readings()
         print(f"Front Distance: {front_distance}, Right Distance: {right_distance}, Left Distance: {left_distance}")
-        
-        if direction == "left":
-            error = left_distance - set_distance
-        else:
-            error = right_distance - set_distance
-        
-        print(f"Error: {error}")
+
+        # Check front sensor and turn if too close
+        if front_distance < 35:
+            print("Front obstacle detected, turning right!")
+            turn_90_degrees("right")
+            continue
+
+        error_left = left_distance - set_distance
+        error_right = right_distance - set_distance
+
+        print(f"Left Error: {error_left}, Right Error: {error_right}")
 
         # Apply proportional control for side walls
-        side_control = Kp_side * error
-        print(f"Side Control Adjustment: {side_control}")
-        
-        if direction == "left":
-            move(controller=controller, l_speed=0.4 - side_control, r_speed=0.4 + side_control, D=0.02, T=0.005)
-        else:
-            move(controller=controller, l_speed=0.4 + side_control, r_speed=0.4 - side_control, D=0.02, T=0.005)
-        
-        # Check for 90-degree turn conditions
-        if (direction == "left" and left_distance > set_distance*1.5) or (front_distance < set_distance):
-            print("Making a 90-degree left turn.")
-            move(controller=controller, l_speed=-0.3, r_speed=0.3, D=0.15, T=0.005)
-        elif (direction == "right" and right_distance > set_distance*1.5) or (front_distance < set_distance):
-            print("Making a 90-degree right turn.")
-            move(controller=controller, l_speed=0.3, r_speed=-0.3, D=0.15, T=0.005)
-        
-        # Check for 180-degree turn conditions
-        if left_distance < set_distance and right_distance < set_distance:
-            print("Blocked from both sides. Making a 180-degree turn.")
-            move(controller=controller, l_speed=-0.3, r_speed=0.3, D=0.3, T=0.005)
+        left_control = Kp_side * error_left
+        right_control = Kp_side * error_right
+        print(f"Left Control Adjustment: {left_control}, Right Control Adjustment: {right_control}")
+
+        l_speed = get_saturated_speed(-1*left_control + right_control)
+        r_speed = get_saturated_speed(left_control - right_control)
+
+        controller.set_speed_l(l_speed)
+        controller.set_speed_r(r_speed)
+
+        current_time = time.time()
+        print(f"time: {current_time - start_time}")
+
+        print(f"Left Motor Speed: {l_speed}, Right Motor Speed: {r_speed}")
+
+    controller.set_speed_l(0)
+    controller.set_speed_r(0)
+
 
 # Test the wall following function
 Kp_side = 0.1  # Replace with the best Kp value from your tests
-wall_following(controller=controller, direction="left", Kp_side=Kp_side)
+wall_following(controller=controller, Kp_side=Kp_side)
