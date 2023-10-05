@@ -19,23 +19,24 @@ def get_saturated_speed(speed):
     else:
         return speed
 
-def turn_90_degrees(direction="right"):
-    """Turns the robot 90 degrees to the specified direction."""
+def turn_degrees(direction="right", degrees=90):
+    """Turns the robot a certain degrees to the specified direction."""
+    turn_duration = 0.75 * (degrees/90)  # Adjust based on robot's turning speed for 90-degree
     if direction == "right":
         controller.set_speed_l(0.3)
         controller.set_speed_r(-0.3)
     else:
         controller.set_speed_l(-0.3)
         controller.set_speed_r(0.3)
-    time.sleep(0.1)  # Adjust as necessary for 90-degree turn
+    time.sleep(turn_duration)
     controller.set_speed_l(0)
     controller.set_speed_r(0)
 
 def wall_following(controller, Kp_side=0.1):
-    """Make the robot follow the wall and maintain a distance."""
+    """Make the robot follow the wall, make decisions based on sensor readings."""
     print(f"Starting wall following with Kp_side: {Kp_side}")
 
-    set_distance = 20  # Set distance from the wall
+    set_distance = 20  # Desired distance from the wall
 
     start_time = time.time()
     current_time = start_time
@@ -46,11 +47,24 @@ def wall_following(controller, Kp_side=0.1):
         front_distance, right_distance, _, left_distance = controller.get_primary_distance_sensor_readings()
         print(f"Front Distance: {front_distance}, Right Distance: {right_distance}, Left Distance: {left_distance}")
 
-        # Check front sensor and turn if too close
+        # Decision-making based on sensor readings
         if front_distance < 35:
-            print("Front obstacle detected, turning right!")
-            turn_90_degrees("right")
-            continue
+            if left_distance > 30:  # Check if there's enough space on the left
+                print("Front obstacle detected, turning left!")
+                turn_degrees("left")
+                continue
+            elif right_distance > 30:  # Check if there's enough space on the right
+                print("Front obstacle detected, turning right!")
+                turn_degrees("right")
+                continue
+            else:  # If both sides are blocked, decide based on which side has more space or turn around
+                if left_distance >= right_distance:
+                    print("Both sides are somewhat blocked, but left has more space. Turning left!")
+                    turn_degrees("left")
+                else:
+                    print("Both sides are somewhat blocked, but right has more space. Turning right!")
+                    turn_degrees("right")
+                continue
 
         error_left = left_distance - set_distance
         error_right = right_distance - set_distance
