@@ -349,7 +349,7 @@ def motion_to_goal():
     obs_detected = False
     front_distance, right_distance, rear_distance, left_distance = controller.get_primary_distance_sensor_readings()
 
-    while not goal_reached:
+     while not goal_reached:
         front_distance, right_distance, rear_distance, left_distance = controller.get_primary_distance_sensor_readings()
         print(f"Front Distance: {front_distance}, Right Distance: {right_distance}, Left Distance: {left_distance}")
         if((front_distance < 20)):
