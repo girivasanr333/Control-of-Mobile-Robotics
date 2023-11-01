@@ -354,14 +354,17 @@ def motion_to_goal():
         print(f"Front Distance: {front_distance}, Right Distance: {right_distance}, Left Distance: {left_distance}")
         if((front_distance < 20)):
             robot(left,105)
-        if(blob_in_frame[0].pt[0] > 250 and blob_in_frame[0].pt[0] < 390)
+        else
+            controller.set_speed_l(0.5)
+            controller.set_speed_r(0.5)
+            if(blob_in_frame[0].pt[0] > 250 and blob_in_frame[0].pt[0] < 390)
             controller.set_speed_r(0.5)
             controller.set_speed_l(0.5)
-            if (blob_in_frame[0].size > 450):
-                controller.set_speed_l(0)
-                controller.set_speed_r(0)
-                goal_reached = True
-                break
+                if (blob_in_frame[0].size > 450):
+                    controller.set_speed_l(0)
+                    controller.set_speed_r(0)
+                    goal_reached = True
+                    break
         # print("X : ",blob_in_frame[0].pt[0], "\nY : ",blob_in_frame[0].pt[1])
 
     time.sleep(1)
