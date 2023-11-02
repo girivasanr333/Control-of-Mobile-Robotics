@@ -247,6 +247,8 @@ def wall_following(controller, Kp_side=0.1):
             controller.set_speed_r(r_speed)
                 
             current_time = time.time()
+            # print(f"time: {current_time - start_time}")
+
         
     controller.set_speed_l(0)
     controller.set_speed_r(0)
