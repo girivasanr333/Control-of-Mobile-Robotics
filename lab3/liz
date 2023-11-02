@@ -364,12 +364,16 @@ while(not blob_seen):
         wall_follow_front_ds(direction="left", Kp_side=Kp_side)
     elif((front_distance < front_set_distance and right_distance > left_distance)):
         wall_follow_front_ds(direction="right", Kp_side=Kp_side)
-	
-	if (blob_in_frame[0].size > 200)
-		if(front_distance < front_set_distance)
-			continue
-		else
-			blob_seen = true
+	if blob_in_frame[0].pt[0] < 250 :
+           continue
+        elif blob_in_frame[0].pt[0] > 390:
+            continue
+	else
+		if (blob_in_frame[0].size > 200)
+			if(front_distance < front_set_distance)
+				continue
+			else
+				blob_seen = true
 	
 while(blob_seen and front_distance > front_set_distance)
 	blob_in_frame = controller.blob.read()
