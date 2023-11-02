@@ -127,30 +127,6 @@ def get_saturated_speed(speed):
         return speed
     
 
-def turn_for_front_ds(direction="left"):
-    """Turns the robot a right to the specified direction."""
-    print("Turning " + direction)
-    distance = 100
-  
-
-    while distance > set_distance:
-   
-        if direction == "right":
-            controller.set_speed_l(0.8)
-            controller.set_speed_r(0.3)
-        else:
-            controller.set_speed_l(0.3)
-            controller.set_speed_r(0.8)
-        if direction=="right":
-            distance = controller.get_distance_reading( controller.right_ds)
-        elif direction=="lect":
-            distance = controller.get_distance_reading( controller.left_ds)
-
-   
-    controller.set_speed_l(0)
-    controller.set_speed_r(0)
-
-
 def wall_follow_front_ds(turn_direction="right", Kp_side=0.1):
 
     front_distance, right_distance, rear_distance, left_distance = controller.get_primary_distance_sensor_readings()
