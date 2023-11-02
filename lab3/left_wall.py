@@ -249,6 +249,7 @@ def wall_following(controller, Kp_side=0.1):
     controller.set_speed_r(0)
         
 
+# Move towards the goal and stop once the goal is reached 
 
 def motion_to_goal():
 
