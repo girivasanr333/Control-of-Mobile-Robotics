@@ -167,11 +167,12 @@ def wall_follow_front_ds(turn_direction="right", Kp_side=0.1):
     controller.set_speed_l(0)
     controller.set_speed_r(0)
     print("out of front wall following")
+    
 
-            
+# U Turn 
 def turn(direction="right"):
     if(direction == "right"):
-        move(controller, 0.6, 0, 200, T=0.005) #U Turn
+        move(controller, 0.6, 0, 200, T=0.005) #90 degree turn 
         move(controller, 0.3, 0.3, 230, T=0.005)
         right_distance = controller.get_distance_reading( controller.right_ds)
 
@@ -233,10 +234,7 @@ def wall_following(controller, Kp_side=0.1):
                 error = right_distance - set_distance
       
             side_control = Kp_side * (error)
-            # print(f"Side Control Adjustment: {side_control}")
-
-
-        
+            # print(f"Side Control Adjustment: {side_control}")        
             
             if front_distance < front_set_distance:
                 if direction == "left":
@@ -253,16 +251,8 @@ def wall_following(controller, Kp_side=0.1):
                     else:
                         l_speed =get_saturated_speed(side_control)
                         r_speed = get_saturated_speed(-1*side_control)
-                # elif direction == "right":
-                #     if right_distance > max_distance :
-                #         turn(direction="right")
-                #         l_speed = 0.0
-                #         r_speed = 0.0
-                #     else:
-                #         l_speed =get_saturated_speed(side_control)
-                #         r_speed = get_saturated_speed(-1*side_control)
+              
             
-        
             controller.set_speed_l(l_speed)
             controller.set_speed_r(r_speed)
                 
@@ -273,22 +263,10 @@ def wall_following(controller, Kp_side=0.1):
     controller.set_speed_r(0)
         
 
-
-
-
 # Test the wall following function
 
 start_time = time.time()
 current_time = time.time()
 wall_following(controller=controller, Kp_side=Kp_side)
-
-
-
-
-# while current_time - start_time < 20:
-#     print("following")
-#     wall_following(controller=controller, Kp_side=Kp_side)
-#     time.sleep(2)
-#     current_time = time.time()
 
 
