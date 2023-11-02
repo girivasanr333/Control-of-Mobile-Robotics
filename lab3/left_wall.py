@@ -251,49 +251,6 @@ def wall_following(controller, Kp_side=0.1):
 
 # Move towards the goal and stop once the goal is reached 
 
-def motion_to_goal():
-
-    goal_reached = False
-    obs_detected = False
-
-    front_distance, right_distance, rear_distance, left_distance = controller.get_primary_distance_sensor_readings()
-
-    while not goal_reached:
-        front_distance, right_distance, rear_distance, left_distance = controller.get_primary_distance_sensor_readings()
-        print(f"Front Distance: {front_distance}, Right Distance: {right_distance}, Left Distance: {left_distance}")
-
-        blob_in_frame = controller.blob.read()
-        print(blob_in_frame)
-        if len(blob_in_frame) == 0 :
-            print("Lost Landmark")
-         
-            wall_following(controller=controller, Kp_side=Kp_side)
-        else:
-            if blob_in_frame[0].pt[0] < 250 :
-                controller.set_speed_l(.15)
-                controller.set_speed_r(-.15)
-            elif blob_in_frame[0].pt[0] > 390:
-                controller.set_speed_l(-.15)
-                controller.set_speed_r(.15)
-            else:
-                print("Found Goal")
-                if blob_in_frame[0].size > 450:
-                    print("Arrived to Goal")
-                    controller.set_speed_l(0)
-                    controller.set_speed_r(0)
-                    goal_reached = True
-                    # break
-                else:
-                    print("Moving to Goal")
-                    controller.set_speed_l(.5)
-                    controller.set_speed_r(.5)
-
-    controller.set_speed_l(0)
-    controller.set_speed_r(0)
-    time.sleep(1)
-    #http://abyz.me.uk/rpi/pigpio/python.html#callback
-    controller.cancel()
-
 
 # Test the wall following function
 
