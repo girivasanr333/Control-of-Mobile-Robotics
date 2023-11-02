@@ -190,6 +190,9 @@ def wall_following(controller, Kp_side=0.1):
 
     direction = "left"
 
+
+  # Move towards the goal and stop once the goal is reached 
+  
     #while True:
     while not goal_reached:
         # Retrieve distance sensor readings
@@ -248,9 +251,6 @@ def wall_following(controller, Kp_side=0.1):
     controller.set_speed_l(0)
     controller.set_speed_r(0)
         
-
-# Move towards the goal and stop once the goal is reached 
-
 
 # Test the wall following function
 
