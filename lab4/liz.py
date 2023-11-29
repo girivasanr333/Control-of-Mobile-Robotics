@@ -1,6 +1,7 @@
 import time
 import robot_controller
-import pigpio
+import pigpio 
+import dsmove
 
 # Initialize the pigpio library and robot controller
 pigpi = pigpio.pi()
