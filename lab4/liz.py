@@ -179,4 +179,18 @@ hsv_landmarks = [green_hsv, pink_hsv, blue_hsv, yellow_hsv]
 while not find_landmarks(robot, hsv_landmarks):
     pass
 
+def main():
+    while time.time() < time.time()*180:
+        dsmove.turn_degrees("right", 90)
+        dsmove.move_cell()
+        dsmove.turn_degrees("left", 90)
+        for i in range(3):
+            while time.time() < time.time()*60:
+                try:
+                    estimated_x, estimated_y = trilateration(distances, landmarks)
+                    print(f"Estimated Position: X={estimated_x} m, Y={estimated_y} m")
+                except ValueError as e:
+                    print(e)
+
+            
 
