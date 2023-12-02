@@ -58,7 +58,7 @@ maze3 = [
 
 maze_open = [
     ['W', 'W', 'O', 'O'],  # Cell 1
-    ['', 'W', 'O', 'O'],  # Cell 2
+    ['O', 'W', 'O', 'O'],  # Cell 2
     ['O', 'W', 'O', 'O'], # Cell 3
     ['O', 'W', 'W', 'O'],  # Cell 4
     ['W', 'O', 'O', 'O'],  # Cell 5
